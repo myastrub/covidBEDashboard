@@ -11,9 +11,9 @@ dates = ds.Cases[c.DATE].unique()
 dates[-1] = today
 dates = pd.to_datetime(dates, format='%Y-%m-%d')
 
-for date in dates:
-    print(ds.dailyCasesAverage(ds.Cases, date))
+#for date in dates:
+#    print(ds.dailyCasesAverage(ds.Cases, date))
 #TODO: expand the Cases, Tests, Hospitalisation datasets with values of previous period (date - 14 days)
 
-print(ds.dailyHospitalAverage(ds.Hospital,today))
-print(ds.getPositivityRate(ds.Tests, today))
+print(ds.dailyHospitalAverage(ds.Hospital,today, 13))
+print(ds.getPositivityRate(ds.Tests, today, 13))
