@@ -7,9 +7,9 @@ today = datetime.datetime(datetime.datetime.today().year,
     datetime.datetime.today().month, 
     datetime.datetime.today().day)
 
-dates = ds.Cases[c.DATE].unique()
-dates[-1] = today
-dates = pd.to_datetime(dates, format='%Y-%m-%d')
+#dates = ds.Cases[c.DATE].unique()
+#dates[-1] = today
+#dates = pd.to_datetime(dates, format='%Y-%m-%d')
 
 #for date in dates:
 #    print(ds.dailyCasesAverage(ds.Cases, date))
