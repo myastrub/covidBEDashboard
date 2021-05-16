@@ -33,17 +33,18 @@ VAC_week = pd.read_csv('https://epistat.sciensano.be/data/COVID19BE_VACC_MUNI_CU
 
 
 #definition of functions used to calculate values for the dashboard
-def getPeriod(referenceDate, days):
+def getPeriod(referenceDate, daysToRemove, period):
     '''Input:
         referenceDate - date from which to calculate last 14 days period
-        days - days to remove from the beginning of the period
+        daysToRemove - days to remove from the beginning of the period
+        period - days until the end of the period (e.g. 7 days, 14 days)
     Output:
         start and end dates of the last 14 days period
     TODO: to update the function to work not only with the today date. Low priority
     '''
     
-    end_date = referenceDate - datetime.timedelta(days=days)
-    start_date = end_date - datetime.timedelta(days=13)
+    end_date = referenceDate - datetime.timedelta(days=daysToRemove)
+    start_date = end_date - datetime.timedelta(days=period)
 
     return start_date, end_date
 
@@ -67,15 +68,17 @@ def getNumberOfAdmissions(hospital, date):
     hospital_at_date = hospital[hospital[c.DATE].eq(date)]
     return hospital_at_date[c.NEW_IN].sum()
 
-def incidentsRate(cases, referenceDate):
+def incidentsRate(cases, referenceDate, period):
     '''Input:
         cases - Cases dataset with a list of confirmed cases
         referenceDate - date from which count the incidents rate
+        period - number of days for which calculate incidents rate
         The incidents rate is calculated for last 14 days with 4 last days excluded
+
     Output:
         incidents rate as a float
     '''
-    start_date, end_date = getPeriod(referenceDate, 4)
+    start_date, end_date = getPeriod(referenceDate, 4, period)
     sum_incidents = 0
     while start_date <= end_date:
         sum_incidents += 100000*getNumberOfCases(Cases, start_date)/c.POPULATION
@@ -83,15 +86,15 @@ def incidentsRate(cases, referenceDate):
 
     return sum_incidents
 
-def dailyCasesAverage(cases, referenceDate):
+def dailyCasesAverage(cases, referenceDate, period):
     '''Input:
         cases - Cases dataset with a list of confirmed cases
         referenceDate - date from which count the incidents rate
-        The daily average is calculated for last 14 days with 4 last days excluded
+        period - number of days for which calculate daily average
     Output:
         daily average as a float
     '''
-    start_date, end_date = getPeriod(referenceDate, 4)
+    start_date, end_date = getPeriod(referenceDate, 4, period)
     sum_cases = 0
     i = 0
     while start_date <= end_date:
@@ -101,15 +104,15 @@ def dailyCasesAverage(cases, referenceDate):
 
     return sum_cases / i
 
-def dailyHospitalAverage(hospital, referenceDate):
+def dailyHospitalAverage(hospital, referenceDate, period):
     '''Input:
         hospital - hospitalisation dataset with a list of admissions
         referenceDate - date from which count the incidents rate
-        The daily average is calculated for last 14 days with 4 last days excluded
+        period - number of days for which calculate daily average
     Output:
         daily average as a float
     '''
-    start_date, end_date = getPeriod(referenceDate, 1)
+    start_date, end_date = getPeriod(referenceDate, 1, period)
     sum_hospital = 0
     i = 0
     while start_date <= end_date:
@@ -139,15 +142,15 @@ def getNumberOfPositiveTests(tests, date):
     tests_at_date = tests[tests[c.DATE].eq(date)]
     return tests_at_date[c.TESTS_ALL_POS].sum()
 
-def getPositivityRate(tests, referenceDate):
+def getPositivityRate(tests, referenceDate, period):
     '''Input:
         tests - tests dataset with a list of tests
         referenceDate - date from which count the positivity rate
-        The daily average is calculated for last 14 days with 4 last days excluded
+        period - number of days for which calculate positivity rate
     Output:
         daily average as a float
     '''
-    start_date, end_date = getPeriod(referenceDate, 4)
+    start_date, end_date = getPeriod(referenceDate, 4, period)
     sum_tests = 0
     i = 0
     while start_date <= end_date:
@@ -156,3 +159,11 @@ def getPositivityRate(tests, referenceDate):
         i += 1
 
     return sum_tests / i
+
+def getCasesDataSet(cases):
+    '''Input:
+        cases - Cases dataset with a list of confirmed cases
+    Output:
+        a new dataset with incidents rate for 
+    '''
+    pass
