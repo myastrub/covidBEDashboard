@@ -52,7 +52,7 @@ def getIncidentsRate(cases, referenceDate, period):
     start_date, end_date = getPeriod(referenceDate, 4, period)
     sum_incidents = 0
     while start_date <= end_date:
-        sum_incidents += 100000*getNumberOfCases(Cases, start_date)/c.POPULATION
+        sum_incidents += 100000*getNumberOfCases(cases, start_date)/c.POPULATION
         start_date += datetime.timedelta(days=1)
 
     return sum_incidents
@@ -121,8 +121,27 @@ def getPositivityRate(tests, referenceDate, period):
 
     return sum_tests / i
 
+def getFirstDoseCount(vaccines):
+    '''Input:
+        vaccines - vaccination dataset with a count of vaccinations per day
+    Output:
+        overall count of first dose vaccinations
+    '''
+    vaccines_first_dose = vaccines[vaccines[c.DOSE].ne(c.SECOND_DOSE)]
+    return vaccines_first_dose[c.COUNT].sum()
+
+def getSecondDoseCount(vaccines):
+    '''Input:
+        vaccines - vaccination dataset with a count of vaccinations per day
+    Output:
+        overall count of second dose vaccinations
+    '''
+    vaccines_second_dose = vaccines[vaccines[c.DOSE].ne(c.FIRST_DOSE)]
+    return vaccines_second_dose[c.COUNT].sum()
+
+
 #TODO: to expand with other datasets (tests, hospitalisations, etc.)
-def getIndicatorsDataSet(cases, hospital, tests, date):
+def getIndicatorsDataSet(cases, hospital, tests, vaccines, date):
     '''Input:
         cases - Cases dataset with a list of confirmed cases
         hospital - Hospital dataset with a list of hospitalisation
@@ -142,6 +161,8 @@ def getIndicatorsDataSet(cases, hospital, tests, date):
     record[c.HOSP_T14] = dailyHospitalAverage(hospital, date - datetime.timedelta(days=14), period)
     record[c.TESTS_T] = getPositivityRate(tests, date, period)
     record[c.TESTS_T14] = getPositivityRate(tests, date - datetime.timedelta(days=14), period)
+    record[c.FD_VACCINE] = getFirstDoseCount(vaccines)
+    record[c.SD_VACCINE] = getSecondDoseCount(vaccines)
 
     return pd.DataFrame(data=record, index=[0])
     

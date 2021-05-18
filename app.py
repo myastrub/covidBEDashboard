@@ -36,7 +36,9 @@ today = datetime.datetime(datetime.datetime.today().year,
     datetime.datetime.today().month, 
     datetime.datetime.today().day)
 
-print(ds.dailyCasesAverage(Cases,today, 14))
-print(ds.dailyHospitalAverage(Hospital,today, 14))
+#print(ds.dailyCasesAverage(Cases,today, 14))
+#print(ds.dailyHospitalAverage(Hospital,today, 14))
 #print(ds.getPositivityRate(ds.Tests, today, 13))
-#print(ds.getIndicatorsDataSet(ds.Cases, ds.Hospital, ds.Tests, today))
+print(ds.getIndicatorsDataSet(Cases, Hospital, Tests, Vaccines, today))
+#print(ds.getFirstDoseCount(Vaccines))
+#print(ds.getSecondDoseCount(Vaccines))
