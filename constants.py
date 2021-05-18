@@ -19,3 +19,12 @@ TX_DESCR_FR = 'TX_DESCR_FR'
 NEW_IN = 'NEW_IN'
 
 POPULATION = 11492641
+
+INC_RATE_T = 'Incident Rate at T'
+INC_RATE_T14 = 'Incident Rate at T-14d'
+CASES_T = 'Cases at T'
+CASES_T14 = 'Cases at T-14d'
+HOSP_T = 'Hospitalisations at T'
+HOSP_T14 = 'Hospitalisations at T-14d'
+TESTS_T = 'Tests at T'
+TESTS_T14 = 'Tests at T-14d'
