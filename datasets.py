@@ -145,6 +145,8 @@ def getIndicatorsDataSet(cases, hospital, tests, vaccines, date):
     '''Input:
         cases - Cases dataset with a list of confirmed cases
         hospital - Hospital dataset with a list of hospitalisation
+        tests - Tests dataset with a list of performed tests
+        vaccines - Vaccination dataset with a count of vaccinations per day
     Output:
         a new dataset with incidents rate, cases, hospitalisation, positivity rates figures for 14 days period for a specified date
     '''
@@ -162,7 +164,63 @@ def getIndicatorsDataSet(cases, hospital, tests, vaccines, date):
     record[c.TESTS_T] = getPositivityRate(tests, date, period)
     record[c.TESTS_T14] = getPositivityRate(tests, date - datetime.timedelta(days=14), period)
     record[c.FD_VACCINE] = getFirstDoseCount(vaccines)
+    record[c.FD_PERCENTAGE] = record[c.FD_VACCINE] / c.POPULATION_18
     record[c.SD_VACCINE] = getSecondDoseCount(vaccines)
-
-    return pd.DataFrame(data=record, index=[0])
+    record[c.SD_PERCENTAGE] = record[c.SD_VACCINE] / c.POPULATION_18
     
+    return pd.DataFrame(data=record, index=[0])
+
+def getCasesGraphData(cases):
+    '''Input:
+        cases - Cases dataset with a list of confirmed cases
+    Output:
+        dataframe with a number of cases per date
+    '''
+    pivot = pd.pivot_table(data=cases, values=c.CASES, index=c.DATE, aggfunc=np.sum)
+    pivot = pivot.reset_index()
+    return pivot
+
+def getHospitalGraphData(hospital):
+    '''Input:
+        hospital - Hospital dataset with a list of hospitalisations
+    Output:
+        dataframe with a number of hospitalisations per date
+    '''
+    pivot = pd.pivot_table(data=hospital, values=c.NEW_IN, index=c.DATE, aggfunc=np.sum)
+    pivot = pivot.reset_index()
+    return pivot
+
+def getPositivityRateGraphData(tests):
+    '''Input:
+        tests- hospitalisation dataset with a number of tests done at a certain date
+    Output:
+        dataframe with a positivity rate per date
+    '''
+    tests_pos_rate = tests.copy()
+    tests_pos_rate[c.POSITIVITY_RATE] = tests_pos_rate[c.TESTS_ALL_POS] / tests_pos_rate[c.TESTS_ALL]
+    pivot = pd.pivot_table(data=tests_pos_rate, values=c.POSITIVITY_RATE, index=c.DATE, aggfunc=np.mean)
+    pivot = pivot.reset_index()
+    return pivot
+
+def getVaccinationGraohData(vaccines):
+    '''Input:
+        vaccines - Vaccination dataset with a count of vaccinations per day
+    Output:
+        dataframe with two values - first dose and second dose administred per day
+    '''
+    #First dose and second dose filtering
+    vaccines_fd = vaccines[vaccines[c.DOSE].ne(c.SECOND_DOSE)]
+    vaccines_sd = vaccines[vaccines[c.DOSE].ne(c.FIRST_DOSE)]
+
+    #generate pivots
+    pivot_fd = pd.pivot_table(data=vaccines_fd, values=c.COUNT, index=c.DATE, aggfunc=np.sum)
+    pivot_fd = pivot_fd.reset_index()
+    pivot_fd[c.FD_VACCINE] = pivot_fd[c.COUNT].cumsum()
+    
+    pivot_sd = pd.pivot_table(data=vaccines_sd, values=c.COUNT, index=c.DATE, aggfunc=np.sum)
+    pivot_sd = pivot_sd.reset_index()
+    pivot_sd[c.SD_VACCINE] = pivot_sd[c.COUNT].cumsum()
+    
+    pivot = pivot_fd.merge(pivot_sd, on=c.DATE)
+    
+    return pivot
