@@ -3,23 +3,25 @@ import pandas as pd
 import datetime
 import constants as c
 
-#definition of functions used to calculate values for the dashboard
-def getPeriod(referenceDate, daysToRemove, period):
+
+def get_period(reference_date, days_to_remove, period):
     '''Input:
-        referenceDate - date from which to calculate last 14 days period
-        daysToRemove - days to remove from the beginning of the period
+        reference_date - date from which to calculate last 14 days period
+        days_to_remove - days to remove from the beginning of the period
         period - days until the end of the period (e.g. 7 days, 14 days)
     Output:
         start and end dates of the last 14 days period
-    TODO: to update the function to work not only with the today date. Low priority
+    TODO: to update the function to work not only with the today date.
+    Low priority
     '''
-    
-    end_date = referenceDate - datetime.timedelta(days=daysToRemove)
+
+    end_date = reference_date - datetime.timedelta(days=days_to_remove)
     start_date = end_date - datetime.timedelta(days=period-1)
 
     return start_date, end_date
 
-def getNumberOfCases(cases, date):
+
+def get_number_of_cases(cases, date):
     '''Input:
         cases - Cases dataset with a list of confirmed cases
         date - specific date at which number of cases has to be calculated
@@ -29,7 +31,8 @@ def getNumberOfCases(cases, date):
     cases_at_date = cases[cases[c.DATE].eq(date)]
     return cases_at_date[c.CASES].sum()
 
-def getNumberOfAdmissions(hospital, date):
+
+def get_number_of_admissions(hospital, date):
     '''Input:
         hospital - hospitalisation dataset with a list of admissions
         date - specific date at which number of cases has to be calculated
@@ -39,53 +42,58 @@ def getNumberOfAdmissions(hospital, date):
     hospital_at_date = hospital[hospital[c.DATE].eq(date)]
     return hospital_at_date[c.NEW_IN].sum()
 
-def getIncidentsRate(cases, referenceDate, period):
+
+def get_incidents_rate(cases, reference_date, period):
     '''Input:
         cases - Cases dataset with a list of confirmed cases
-        referenceDate - date from which count the incidents rate
+        reference_date - date from which count the incidents rate
         period - number of days for which calculate incidents rate
-        The incidents rate is calculated for last 14 days with 4 last days excluded
-
+        The incidents rate is calculated for last 14 days
+        with 4 last days excluded
     Output:
         incidents rate as a float
     '''
-    start_date, end_date = getPeriod(referenceDate, 4, period)
+    start_date, end_date = get_period(reference_date, 4, period)
     sum_incidents = 0
     while start_date <= end_date:
-        sum_incidents += 100000*getNumberOfCases(cases, start_date)/c.POPULATION
+        sum_incidents += 100000*get_number_of_cases(
+            cases, start_date)/c.POPULATION
         start_date += datetime.timedelta(days=1)
 
     return sum_incidents
 
-def dailyCasesAverage(cases, referenceDate, period):
+
+def get_daily_cases_average(cases, reference_date, period):
     '''Input:
         cases - Cases dataset with a list of confirmed cases
-        referenceDate - date from which count the incidents rate
+        reference_date - date from which count the incidents rate
         period - number of days for which calculate daily average
     Output:
         daily average as a float
     '''
-    start_date, end_date = getPeriod(referenceDate, 4, period)
+    start_date, end_date = get_period(reference_date, 4, period)
     cases_at_period = cases[cases[c.DATE].ge(start_date) & cases[c.DATE].le(end_date)]
     sum_cases = cases_at_period[c.CASES].sum()
     return sum_cases / period
 
-def dailyHospitalAverage(hospital, referenceDate, period):
+
+def get_daily_hospital_average(hospital, reference_date, period):
     '''Input:
         hospital - hospitalisation dataset with a list of admissions
-        referenceDate - date from which count the incidents rate
+        reference_date - date from which count the incidents rate
         period - number of days for which calculate daily average
     Output:
         daily average as a float
     '''
-    start_date, end_date = getPeriod(referenceDate, 1, period)
+    start_date, end_date = get_period(reference_date, 1, period)
     hospital_at_date = hospital[hospital[c.DATE].ge(start_date) & hospital[c.DATE].le(end_date)]
     sum_hospital = hospital_at_date[c.NEW_IN].sum()
     return sum_hospital / period
 
-def getNumberOfTests(tests, date):
+
+def get_number_of_tests(tests, date):
     '''Input:
-        tests- hospitalisation dataset with a number of tests done at a certain date
+        tests- hospitalisation dataset with a number of tests done at a date
         date - specific date at which number of tests has to be calculated
     Output:
         number of tests at a specific date
@@ -93,9 +101,10 @@ def getNumberOfTests(tests, date):
     tests_at_date = tests[tests[c.DATE].eq(date)]
     return tests_at_date[c.TESTS_ALL].sum()
 
-def getNumberOfPositiveTests(tests, date):
+
+def get_number_of_positive_tests(tests, date):
     '''Input:
-        tests- tests dataset with a number of tests done at a certain date
+        tests- tests dataset with a number of tests done at a date
         date - specific date at which number of tests has to be calculated
     Output:
         number of tests at a specific date
@@ -103,34 +112,38 @@ def getNumberOfPositiveTests(tests, date):
     tests_at_date = tests[tests[c.DATE].eq(date)]
     return tests_at_date[c.TESTS_ALL_POS].sum()
 
-def getPositivityRate(tests, referenceDate, period):
+
+def get_positivity_rate(tests, reference_date, period):
     '''Input:
         tests - tests dataset with a list of tests
-        referenceDate - date from which count the positivity rate
+        reference_date - date from which count the positivity rate
         period - number of days for which calculate positivity rate
     Output:
         daily average as a float
     '''
-    start_date, end_date = getPeriod(referenceDate, 4, period)
+    start_date, end_date = get_period(reference_date, 4, period)
     sum_tests = 0
     i = 0
     while start_date <= end_date:
-        sum_tests += getNumberOfPositiveTests(tests, start_date) / getNumberOfTests(tests, start_date)
+        sum_tests += get_number_of_positive_tests(
+            tests, start_date) / get_number_of_tests(tests, start_date)
         start_date += datetime.timedelta(days=1)
         i += 1
 
     return sum_tests / i
 
-def getFirstDoseCount(vaccines):
+
+def get_first_dose_count(vaccines):
     '''Input:
-        vaccines - vaccination dataset with a count of vaccinations per day
+        vaccines - dataset with a count of vaccinations per day
     Output:
         overall count of first dose vaccinations
     '''
     vaccines_first_dose = vaccines[vaccines[c.DOSE].ne(c.SECOND_DOSE)]
     return vaccines_first_dose[c.COUNT].sum()
 
-def getSecondDoseCount(vaccines):
+
+def get_second_dose_count(vaccines):
     '''Input:
         vaccines - vaccination dataset with a count of vaccinations per day
     Output:
@@ -140,87 +153,106 @@ def getSecondDoseCount(vaccines):
     return vaccines_second_dose[c.COUNT].sum()
 
 
-#TODO: to expand with other datasets (tests, hospitalisations, etc.)
-def getIndicatorsDataSet(cases, hospital, tests, vaccines, date):
+def get_indicators_dataset(cases, hospital, tests, vaccines, date):
     '''Input:
         cases - Cases dataset with a list of confirmed cases
         hospital - Hospital dataset with a list of hospitalisation
         tests - Tests dataset with a list of performed tests
         vaccines - Vaccination dataset with a count of vaccinations per day
     Output:
-        a new dataset with incidents rate, cases, hospitalisation, positivity rates figures for 14 days period for a specified date
+        a new dataset with incidents rate, cases, hospitalisation,
+        positivity rates figures for 14 days period for a specified date
     '''
-    
+
     period = 13
-    
+
     record = {}
     record[c.DATE] = date
-    record[c.INC_RATE_T] = getIncidentsRate(cases, date, period)
-    record[c.INC_RATE_T14] = getIncidentsRate(cases, date - datetime.timedelta(days=14), period)
-    record[c.CASES_T] = dailyCasesAverage(cases, date, period)
-    record[c.CASES_T14] = dailyCasesAverage(cases, date - datetime.timedelta(days=14), period)
-    record[c.HOSP_T] = dailyHospitalAverage(hospital, date, period)
-    record[c.HOSP_T14] = dailyHospitalAverage(hospital, date - datetime.timedelta(days=14), period)
-    record[c.TESTS_T] = getPositivityRate(tests, date, period)
-    record[c.TESTS_T14] = getPositivityRate(tests, date - datetime.timedelta(days=14), period)
-    record[c.FD_VACCINE] = getFirstDoseCount(vaccines)
+    record[c.INC_RATE_T] = get_incidents_rate(cases, date, period)
+    record[c.INC_RATE_T14] = get_incidents_rate(
+        cases, date - datetime.timedelta(days=14), period)
+    record[c.CASES_T] = get_daily_cases_average(cases, date, period)
+    record[c.CASES_T14] = get_daily_cases_average(
+        cases, date - datetime.timedelta(days=14), period)
+    record[c.HOSP_T] = get_daily_hospital_average(hospital, date, period)
+    record[c.HOSP_T14] = get_daily_hospital_average(
+        hospital, date - datetime.timedelta(days=14), period)
+    record[c.TESTS_T] = get_positivity_rate(tests, date, period)
+    record[c.TESTS_T14] = get_positivity_rate(
+        tests, date - datetime.timedelta(days=14), period)
+    record[c.FD_VACCINE] = get_first_dose_count(vaccines)
     record[c.FD_PERCENTAGE] = record[c.FD_VACCINE] / c.POPULATION_18
-    record[c.SD_VACCINE] = getSecondDoseCount(vaccines)
+    record[c.SD_VACCINE] = get_second_dose_count(vaccines)
     record[c.SD_PERCENTAGE] = record[c.SD_VACCINE] / c.POPULATION_18
-    
+
     return pd.DataFrame(data=record, index=[0])
 
-def getCasesGraphData(cases):
+
+def get_cases_graph_data(cases):
     '''Input:
         cases - Cases dataset with a list of confirmed cases
     Output:
         dataframe with a number of cases per date
     '''
-    pivot = pd.pivot_table(data=cases, values=c.CASES, index=c.DATE, aggfunc=np.sum)
+    pivot = pd.pivot_table(
+        data=cases, values=c.CASES,
+        index=c.DATE, aggfunc=np.sum)
     pivot = pivot.reset_index()
     return pivot
 
-def getHospitalGraphData(hospital):
+
+def get_hospital_graph_data(hospital):
     '''Input:
         hospital - Hospital dataset with a list of hospitalisations
     Output:
         dataframe with a number of hospitalisations per date
     '''
-    pivot = pd.pivot_table(data=hospital, values=c.NEW_IN, index=c.DATE, aggfunc=np.sum)
+    pivot = pd.pivot_table(
+        data=hospital, values=c.NEW_IN,
+        index=c.DATE, aggfunc=np.sum)
     pivot = pivot.reset_index()
     return pivot
 
-def getPositivityRateGraphData(tests):
+
+def get_positivity_rate_graph_data(tests):
     '''Input:
-        tests- hospitalisation dataset with a number of tests done at a certain date
+        tests- hospitalisation dataset with a number of tests done at a date
     Output:
         dataframe with a positivity rate per date
     '''
     tests_pos_rate = tests.copy()
-    tests_pos_rate[c.POSITIVITY_RATE] = tests_pos_rate[c.TESTS_ALL_POS] / tests_pos_rate[c.TESTS_ALL]
-    pivot = pd.pivot_table(data=tests_pos_rate, values=c.POSITIVITY_RATE, index=c.DATE, aggfunc=np.mean)
+    tests_pos_rate[c.POSITIVITY_RATE] = tests_pos_rate[c.TESTS_ALL_POS] \
+        / tests_pos_rate[c.TESTS_ALL]
+    pivot = pd.pivot_table(
+        data=tests_pos_rate, values=c.POSITIVITY_RATE,
+        index=c.DATE, aggfunc=np.mean)
     pivot = pivot.reset_index()
     return pivot
 
-def getVaccinationGraohData(vaccines):
+
+def get_vaccination_graph_data(vaccines):
     '''Input:
         vaccines - Vaccination dataset with a count of vaccinations per day
     Output:
-        dataframe with two values - first dose and second dose administred per day
+        dataframe with two values - first andd second doses administred per day
     '''
-    #First dose and second dose filtering
+    # First dose and second dose filtering
     vaccines_fd = vaccines[vaccines[c.DOSE].ne(c.SECOND_DOSE)]
     vaccines_sd = vaccines[vaccines[c.DOSE].ne(c.FIRST_DOSE)]
 
-    #generate pivots
-    pivot_fd = pd.pivot_table(data=vaccines_fd, values=c.COUNT, index=c.DATE, aggfunc=np.sum)
+    # generate pivots
+    pivot_fd = pd.pivot_table(
+        data=vaccines_fd, values=c.COUNT,
+        index=c.DATE, aggfunc=np.sum)
     pivot_fd = pivot_fd.reset_index()
     pivot_fd[c.FD_VACCINE] = pivot_fd[c.COUNT].cumsum()
-    
-    pivot_sd = pd.pivot_table(data=vaccines_sd, values=c.COUNT, index=c.DATE, aggfunc=np.sum)
+
+    pivot_sd = pd.pivot_table(
+        data=vaccines_sd, values=c.COUNT,
+        index=c.DATE, aggfunc=np.sum)
     pivot_sd = pivot_sd.reset_index()
     pivot_sd[c.SD_VACCINE] = pivot_sd[c.COUNT].cumsum()
-    
+
     pivot = pivot_fd.merge(pivot_sd, on=c.DATE)
-    
+
     return pivot

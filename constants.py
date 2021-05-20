@@ -1,8 +1,8 @@
-#Constants used in the datasets as field names
-#full description of each is available here: 
-#https://epistat.sciensano.be/COVID19BE_codebook.pdf
+# Constants used in the datasets as field names
+# full description of each is available here:
+# https://epistat.sciensano.be/COVID19BE_codebook.pdf
 
-DATE = 'DATE' 
+DATE = 'DATE'
 PROVINCE = 'PROVINCE'
 REGION = 'REGION'
 AGEGROUP = 'AGEGROUP'
