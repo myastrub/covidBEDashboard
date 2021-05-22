@@ -1,47 +1,81 @@
 import datasets as ds
+from datasets import cases, vaccines, tests, hospital
 import constants as c
 import pandas as pd
 import datetime
+import dash
+import dash_bootstrap_components as dbc
+import dash_core_components as dcc
+import dash_html_components as html
+import plotly.graph_objects as go
 
-# Import of the data needed for the dashboard from:
-# https://epistat.wiv-isp.be/covid/
-# Confirmed cases by date, age, sex and province
-cases = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_CASES_AGESEX.csv')
-cases[c.DATE] = pd.to_datetime(cases[c.DATE], format='%Y-%m-%d')
-
-""" Cumulative number of confirmed cases by municipality
-CUM_cases = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_CASES_MUNI_CUM.csv') """
-
-""" Confirmed cases by date and municipality
-MUN_cases = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_CASES_MUNI.csv') """
-
-# Hospitalisations by date and provinces
-hospital = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_HOSP.csv')
-hospital[c.DATE] = pd.to_datetime(hospital[c.DATE], format='%Y-%m-%d')
-
-""" Mortality by date, age, sex, and region
-Mortal = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_MORT.csv') """
-
-# Total number of tests by date
-tests = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_tests.csv')
-tests[c.DATE] = pd.to_datetime(tests[c.DATE], format='%Y-%m-%d')
-
-# Administered vaccines by date, region, age, sex and dose
-vaccines = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_VACC.csv')
-vaccines[c.DATE] = pd.to_datetime(vaccines[c.DATE], format='%Y-%m-%d')
-
-""" Administered vaccines by week, municipality, agegroup and dose
-VAC_week = pd.read_csv('https://epistat.sciensano.be/data/COVID19BE_VACC_MUNI_CUM.csv') """
 
 today = datetime.datetime(
-    datetime.datetime.today().year, datetime.datetime.today().month,
+    datetime.datetime.today().year, 
+    datetime.datetime.today().month,
     datetime.datetime.today().day)
 
-""" print(ds.dailyCasesAverage(Cases,today, 14))
-print(ds.dailyHospitalAverage(Hospital,today, 14))
-print(ds.getPositivityRate(ds.Tests, today, 13))
-print(ds.getIndicatorsDataSet(Cases, Hospital, Tests, Vaccines, today))
-print(ds.getFirstDoseCount(Vaccines))
-print(ds.getSecondDoseCount(Vaccines))
-print(ds.getHospitalGraphData(Hospital)) """
-print(ds.get_vaccination_graph_data(vaccines))
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+
+indicators = ds.get_indicators_dataset(cases, hospital, tests, vaccines, today)
+
+fig_indicators = go.Figure()
+fig_indicators.add_trace(go.Indicator(
+    mode='number+delta',
+    value = indicators[c.INC_RATE_T],
+    delta = {
+        'reference': indicators[c.INC_RATE_T14], 
+        'relative':True,
+        'increasing': {
+            'color': '#FF4136'
+        },
+        'decreasing': {
+            'color':'#3D9970'
+        }},
+    domain={'row': 0, 'column': 0},
+    title = {'text': 'Incident Rate (last 14 days)'}
+))
+
+fig_indicators.add_trace(go.Indicator(
+    mode='number+delta',
+    value = indicators[c.CASES_T],
+    delta = {
+        'reference': indicators[c.CASES_T14], 
+        'relative':True,
+        'increasing': {
+            'color': '#FF4136'
+        },
+        'decreasing': {
+            'color':'#3D9970'
+        }},
+    domain={'row': 0, 'column': 1},
+    title={'text': 'Last 14 days Daily Average'}
+))
+
+fig_indicators.update_layout(
+    grid={'rows': 4, 'columns': 2}
+)
+
+
+app.layout = html.Div(children=[
+    html.H1("Test app"),
+    dbc.Row([
+        dbc.Col(
+            dbc.Row(
+                dbc.Col(
+                    html.Div(dcc.Graph(figure=fig_indicators))
+                )
+            )
+        ),
+        dbc.Col(
+            dbc.Row(
+                dbc.Col(
+                    html.Div(dbc.Alert("1 Row, 2 Column, 1 subcolum"))
+                )
+            )
+        )
+    ])
+])
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
