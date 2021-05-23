@@ -6,8 +6,8 @@ import constants as c
 # Import of the data needed for the dashboard from:
 # https://epistat.wiv-isp.be/covid/
 # Confirmed cases by date, age, sex and province
-cases = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_CASES_AGESEX.csv')
-cases[c.DATE] = pd.to_datetime(cases[c.DATE], format='%Y-%m-%d')
+df_cases = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_CASES_AGESEX.csv')
+df_cases[c.DATE] = pd.to_datetime(df_cases[c.DATE], format='%Y-%m-%d')
 
 """ Cumulative number of confirmed cases by municipality
 CUM_cases = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_CASES_MUNI_CUM.csv') """
@@ -169,23 +169,27 @@ def get_positivity_rate(tests, reference_date, period):
     return sum_tests / i
 
 
-def get_first_dose_count(vaccines):
+def get_first_dose_count(vaccines, date):
     """Input:
         vaccines - dataset with a count of vaccinations per day
+        date - date at which get count
     Output:
         overall count of first dose vaccinations
     """
-    vaccines_first_dose = vaccines[vaccines[c.DOSE].ne(c.SECOND_DOSE)]
+    vaccines_first_dose = vaccines[
+        vaccines[c.DOSE].ne(c.SECOND_DOSE) & vaccines[c.DATE].le(date)]
     return vaccines_first_dose[c.COUNT].sum()
 
 
-def get_second_dose_count(vaccines):
+def get_second_dose_count(vaccines, date):
     """Input:
         vaccines - vaccination dataset with a count of vaccinations per day
+        date - date at which get count
     Output:
         overall count of second dose vaccinations
     """
-    vaccines_second_dose = vaccines[vaccines[c.DOSE].ne(c.FIRST_DOSE)]
+    vaccines_second_dose = vaccines[
+        vaccines[c.DOSE].ne(c.FIRST_DOSE) & vaccines[c.DATE].le(date)]
     return vaccines_second_dose[c.COUNT].sum()
 
 
@@ -200,7 +204,7 @@ def get_indicators_dataset(cases, hospital, tests, vaccines, date):
         positivity rates figures for 14 days period for a specified date
     """
 
-    period = 13
+    period = 14
 
     record = {}
     record[c.DATE] = date
@@ -220,10 +224,16 @@ def get_indicators_dataset(cases, hospital, tests, vaccines, date):
     record[c.TESTS_T14] = get_positivity_rate(
         tests, date - datetime.timedelta(days=14), period
     )
-    record[c.FD_VACCINE] = get_first_dose_count(vaccines)
-    record[c.FD_PERCENTAGE] = record[c.FD_VACCINE] / c.POPULATION_18
-    record[c.SD_VACCINE] = get_second_dose_count(vaccines)
-    record[c.SD_PERCENTAGE] = record[c.SD_VACCINE] / c.POPULATION_18
+    record[c.FD_VACCINE_T] = get_first_dose_count(vaccines, date)
+    record[c.FD_VACCINE_T14] = get_first_dose_count(
+        vaccines, date-datetime.timedelta(days=14))
+    record[c.FD_PERCENTAGE_T] = record[c.FD_VACCINE_T] / c.POPULATION_18
+    record[c.FD_PERCENTAGE_T14] = record[c.FD_VACCINE_T14] / c.POPULATION_18
+    record[c.SD_VACCINE_T] = get_second_dose_count(vaccines, date)
+    record[c.SD_VACCINE_T14] = get_second_dose_count(
+        vaccines, date - datetime.timedelta(days=14))
+    record[c.SD_PERCENTAGE_T] = record[c.SD_VACCINE_T] / c.POPULATION_18
+    record[c.SD_PERCENTAGE_T14] = record[c.SD_VACCINE_T14] / c.POPULATION_18
 
     return record
 
