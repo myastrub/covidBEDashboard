@@ -6,8 +6,8 @@ import constants as c
 # Import of the data needed for the dashboard from:
 # https://epistat.wiv-isp.be/covid/
 # Confirmed cases by date, age, sex and province
-df_cases = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_CASES_AGESEX.csv')
-df_cases[c.DATE] = pd.to_datetime(df_cases[c.DATE], format='%Y-%m-%d')
+cases = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_CASES_AGESEX.csv')
+cases[c.DATE] = pd.to_datetime(cases[c.DATE], format='%Y-%m-%d')
 
 """ Cumulative number of confirmed cases by municipality
 CUM_cases = pd.read_csv('https://epistat.sciensano.be/Data/COVID19BE_CASES_MUNI_CUM.csv') """
