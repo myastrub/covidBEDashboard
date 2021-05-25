@@ -40,3 +40,8 @@ SD_VACCINE_T = 'Second Dose Vaccination at T'
 SD_VACCINE_T14 = 'Second Dose Vaccination at T-14d'
 SD_PERCENTAGE_T = 'Full Vaccination 18+ Coverage at T'
 SD_PERCENTAGE_T14 = 'Full Vaccination 18+ Coverage at T-14d'
+
+# Moving averages
+CASES_MA = 'Cases Moving Average'
+HOSP_MA = 'Hospitalisations Moving Average'
+POS_RATE_MA = 'Positivity Rate Moving Average'

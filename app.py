@@ -24,6 +24,8 @@ indicators = ds.get_indicators_dataset(cases, hospital, tests, vaccines, today)
 
 # template text to be used for the title of each indicator
 title_template = "<span style='font-size:0.8em;'>{}</span>"
+graph_color = '#3498db'
+figure_height = 225
 
 # initiating figure and adding traces with each indicator
 # from the received dataset
@@ -149,16 +151,19 @@ fig_cases_hospital = make_subplots(
     rows=2, cols=1,
     subplot_titles=['Daily new cases', 'Daily hospitalisations'])
 
-# retrieve data for subplots
+# retrieve data for subplots / plots
 cases_graph_data = ds.get_cases_graph_data(cases)
 hospital_graph_data = ds.get_hospital_graph_data(hospital)
+positivity_graph_data = ds.get_positivity_rate_graph_data(tests)
+vaccination_graph_data = ds.get_vaccination_graph_data(vaccines)
 
 fig_cases_hospital.add_trace(
     go.Scatter(
         x=cases_graph_data[c.DATE],
-        y=cases_graph_data[c.CASES],
+        y=cases_graph_data[c.CASES_MA],
         name='Cases',
-        line_shape='spline'
+        line_shape='spline',
+        line={'color': graph_color}
     ),row=1, col=1
 )
 
@@ -166,9 +171,10 @@ fig_cases_hospital.add_trace(
 fig_cases_hospital.add_trace(
     go.Scatter(
         x=hospital_graph_data[c.DATE],
-        y=hospital_graph_data[c.NEW_IN],
+        y=hospital_graph_data[c.HOSP_MA],
         name='Hospitalisations',
-        line_shape='spline'
+        line_shape='spline',
+        line={'color': graph_color}
     ), row=2, col=1
 )
 
@@ -181,38 +187,112 @@ fig_cases_hospital.update_layout(
     showlegend=False
 )
 
+""" fig_vaccination_pos_rate = make_subplots(
+    rows=2, cols=1,
+    subplot_titles=['Vaccination progress']) """
+
+fig_vaccination = go.Figure()
+
+fig_vaccination.add_trace(
+    go.Scatter(
+        x=vaccination_graph_data[c.DATE],
+        y=vaccination_graph_data[c.FD_VACCINE_T],
+        name='First dose'
+    )
+)
+
+fig_vaccination.add_trace(
+    go.Scatter(
+        x=vaccination_graph_data[c.DATE],
+        y=vaccination_graph_data[c.SD_VACCINE_T],
+        name='Fully vaccinated'
+    )
+)
+
+""" fig_vaccination_pos_rate.add_trace(
+    go.Scatter(
+        x=positivity_graph_data[c.DATE],
+        y=positivity_graph_data[c.POSITIVITY_RATE]
+    ), row=1, col=2
+)
+ """
+fig_vaccination.update_layout(
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font={"color": "#fff"},
+    height=300,
+    title={
+        'text':'Vaccination progress',
+        'x': 0.5}
+)
+
+fig_pos_rate = go.Figure()
+
+fig_pos_rate.add_trace(
+    go.Scatter(
+        x=positivity_graph_data[c.DATE],
+        y=positivity_graph_data[c.POS_RATE_MA],
+        name='Positivity Rate'
+    )
+)
+
+fig_pos_rate.update_layout(
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font={"color": "#fff"},
+    height=300,
+    title={
+        'text':'Positivity Rate',
+        'x': 0.5},
+    yaxis={
+        'tickformat': '%'
+    }
+)
+
 app.layout = html.Div(
     children=[
         html.H1("COVID-19 Belgium Dashboard", style={
             'text-align': 'center',
             'margin': '20px'
         }),
-        dbc.Row(
-            [
+        dbc.Row([
                 dbc.Col(
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                dcc.Graph(id="fig_indicators", figure=fig_indicators,
-                                config={'displaylogo': False})
-                            )
+                    html.Div(
+                        dcc.Graph(
+                            id="fig_indicators", figure=fig_indicators,
+                            config={'displaylogo': False}
                         )
                     )
-                ),
+                ,xl=6, lg=6, md=12, xs=12),
                 dbc.Col(
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                dcc.Graph(
-                                    id="fig_cases_hospital", figure=fig_cases_hospital,
-                                    config={'displaylogo': False}
-                                )
-                            )
+                    html.Div(dcc.Graph(
+                        id="fig_cases_hospital", figure=fig_cases_hospital,
+                        config={'displaylogo': False}
                         )
                     )
-                ),
-            ]
-        ),
+                ,xl=6, lg=6, md=12, xs=12
+                )
+            ]),
+        dbc.Row([
+            dbc.Col(
+                html.Div(
+                    dcc.Graph(
+                        id='fig_vaccination', figure=fig_vaccination,
+                        config={'displaylogo': False}
+                    )
+                )
+                ,xl=6, lg=6, md=12, xs=12
+            ),
+            dbc.Col(
+                html.Div(
+                    dcc.Graph(
+                        id='fig_positivity_rate', figure=fig_pos_rate,
+                        config={'displaylogo': False}
+                    )
+                )
+            ,xl=6, lg=6, md=12, xs=12
+            )
+        ])
     ]
 )
 

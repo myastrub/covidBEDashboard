@@ -248,6 +248,7 @@ def get_cases_graph_data(cases):
         data=cases, values=c.CASES, index=c.DATE, aggfunc=np.sum
     )
     pivot = pivot.reset_index()
+    pivot[c.CASES_MA] = pivot.rolling(window=7).mean()
     return pivot
 
 
@@ -261,6 +262,7 @@ def get_hospital_graph_data(hospital):
         data=hospital, values=c.NEW_IN, index=c.DATE, aggfunc=np.sum
     )
     pivot = pivot.reset_index()
+    pivot[c.HOSP_MA] = pivot.rolling(window=7).mean()
     return pivot
 
 
@@ -281,6 +283,7 @@ def get_positivity_rate_graph_data(tests):
         aggfunc=np.mean,
     )
     pivot = pivot.reset_index()
+    pivot[c.POS_RATE_MA] = pivot.rolling(window=7).mean()
     return pivot
 
 
@@ -299,13 +302,13 @@ def get_vaccination_graph_data(vaccines):
         data=vaccines_fd, values=c.COUNT, index=c.DATE, aggfunc=np.sum
     )
     pivot_fd = pivot_fd.reset_index()
-    pivot_fd[c.FD_VACCINE] = pivot_fd[c.COUNT].cumsum()
+    pivot_fd[c.FD_VACCINE_T] = pivot_fd[c.COUNT].cumsum()
 
     pivot_sd = pd.pivot_table(
         data=vaccines_sd, values=c.COUNT, index=c.DATE, aggfunc=np.sum
     )
     pivot_sd = pivot_sd.reset_index()
-    pivot_sd[c.SD_VACCINE] = pivot_sd[c.COUNT].cumsum()
+    pivot_sd[c.SD_VACCINE_T] = pivot_sd[c.COUNT].cumsum()
 
     pivot = pivot_fd.merge(pivot_sd, on=c.DATE)
 
