@@ -17,8 +17,9 @@ today = datetime.datetime(
     datetime.datetime.today().day,
 )
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
-
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY], meta_tags=[
+         {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+])
 server = app.server
 
 # get indicators needed for the first plot
@@ -43,7 +44,7 @@ fig_indicators.add_trace(
             "decreasing": {"color": "#3D9970"},
         },
         domain={"row": 0, "column": 0},
-        title={"text": title_template.format("Incident Rate (last 14 days)")},
+        title={"text": title_template.format("Incident Rate")},
     )
 )
 
@@ -58,7 +59,7 @@ fig_indicators.add_trace(
             "decreasing": {"color": "#3D9970"},
         },
         domain={"row": 0, "column": 1},
-        title={"text": title_template.format("Cases Daily Average last 14 days)")},
+        title={"text": title_template.format("Cases Daily Average")},
     )
 )
 
@@ -75,7 +76,7 @@ fig_indicators.add_trace(
         domain={"row": 1, "column": 0},
         title={
             "text": title_template.format(
-                "Hospitalisations Daily Average (last 14 days)"
+                "Hospitalisations Daily Average"
             )
         },
     )
@@ -93,7 +94,7 @@ fig_indicators.add_trace(
             "decreasing": {"color": "#3D9970"},
         },
         domain={"row": 1, "column": 1},
-        title={"text": title_template.format("Positivity Rate (last 14 days)")},
+        title={"text": title_template.format("Positivity Rate")},
     )
 )
 
@@ -141,10 +142,14 @@ fig_indicators.add_trace(
 
 fig_indicators.update_layout(
     grid={"rows": 4, "columns": 2, "ygap": 0.4},
-    margin={"l": 30, "r": 30, "t": 50, "b": 40},
+    margin={"l": 30, "r": 30, "t": 70, "b": 40},
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    font={"color": "#fff"}
+    font={"color": "#fff"},
+    title={
+        'text': 'Indicators of last 14 days',
+        'x': 0.5
+    }
 )
 
 
@@ -166,7 +171,7 @@ layout = go.Layout(
     showlegend=False,
     height=225,
     margin={
-        't': 50,
+        't': 70,
         'b': 40
     },
     title={
@@ -250,63 +255,70 @@ fig_pos_rate.update_layout(
     }
 )
 
+container_margins={
+    "margin-left": "5%",
+    "margin-right": "5%"
+}
+
 app.layout = html.Div(
     children=[
         html.H1("COVID-19 Belgium Dashboard", style={
             'text-align': 'center',
             'margin': '20px'
         }),
-        dbc.Row([
+        dbc.Container([
+            dbc.Row([
+                    dbc.Col(
+                        html.Div(
+                            dcc.Graph(
+                                id="fig_indicators", figure=fig_indicators,
+                                config={'displaylogo': False}
+                            )
+                        )
+                    ,xl=6, lg=6, md=12, xs=12),
+                    dbc.Col(children=[
+                        dbc.Row(
+                            dbc.Col(
+                                html.Div(dcc.Graph(
+                                    id="fig_cases_hospital", figure=fig_cases,
+                                    config={'displaylogo': False}
+                                    )
+                                )
+                            )
+                        ),
+                        dbc.Row(
+                            dbc.Col(
+                                html.Div(dcc.Graph(
+                                    id="fig_hospital", figure=fig_hospital,
+                                    config={'displaylogo': False}
+                                    )
+                                )
+                            )
+                        )
+                    ]
+                    ,xl=6, lg=6, md=12, xs=12)
+                ]),
+            dbc.Row([
                 dbc.Col(
                     html.Div(
                         dcc.Graph(
-                            id="fig_indicators", figure=fig_indicators,
+                            id='fig_vaccination', figure=fig_vaccination,
                             config={'displaylogo': False}
                         )
                     )
-                ,xl=6, lg=6, md=12, xs=12),
-                dbc.Col(children=[
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(dcc.Graph(
-                                id="fig_cases_hospital", figure=fig_cases,
-                                config={'displaylogo': False}
-                                )
-                            )
-                        )
-                    ),
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(dcc.Graph(
-                                id="fig_hospital", figure=fig_hospital,
-                                config={'displaylogo': False}
-                                )
-                            )
+                    ,xl=6, lg=6, md=12, xs=12
+                ),
+                dbc.Col(
+                    html.Div(
+                        dcc.Graph(
+                            id='fig_positivity_rate', figure=fig_pos_rate,
+                            config={'displaylogo': False}
                         )
                     )
-                ]
-                ,xl=6, lg=6, md=12, xs=12)
-            ]),
-        dbc.Row([
-            dbc.Col(
-                html.Div(
-                    dcc.Graph(
-                        id='fig_vaccination', figure=fig_vaccination,
-                        config={'displaylogo': False}
-                    )
-                )
                 ,xl=6, lg=6, md=12, xs=12
-            ),
-            dbc.Col(
-                html.Div(
-                    dcc.Graph(
-                        id='fig_positivity_rate', figure=fig_pos_rate,
-                        config={'displaylogo': False}
-                    )
                 )
-            ,xl=6, lg=6, md=12, xs=12
-            )
-        ], align="center")
+            ], align="center")
+        ], fluid=True)
     ]
 )
 
