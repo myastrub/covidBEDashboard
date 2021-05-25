@@ -19,6 +19,8 @@ today = datetime.datetime(
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
+server = app.server
+
 # get indicators needed for the first plot
 indicators = ds.get_indicators_dataset(cases, hospital, tests, vaccines, today)
 
@@ -139,7 +141,7 @@ fig_indicators.add_trace(
 
 fig_indicators.update_layout(
     grid={"rows": 4, "columns": 2, "ygap": 0.4},
-    margin={"l": 30, "r": 30, "t": 80, "b": 50},
+    margin={"l": 30, "r": 30, "t": 50, "b": 40},
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     font={"color": "#fff"}
@@ -157,41 +159,55 @@ hospital_graph_data = ds.get_hospital_graph_data(hospital)
 positivity_graph_data = ds.get_positivity_rate_graph_data(tests)
 vaccination_graph_data = ds.get_vaccination_graph_data(vaccines)
 
-fig_cases_hospital.add_trace(
+layout = go.Layout(
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font={"color": "#fff"},
+    showlegend=False,
+    height=225,
+    margin={
+        't': 50,
+        'b': 40
+    },
+    title={
+        'x': 0.5
+    }
+)
+
+fig_cases = go.Figure(layout=layout)
+fig_hospital = go.Figure(layout=layout)
+
+fig_cases.add_trace(
     go.Scatter(
         x=cases_graph_data[c.DATE],
         y=cases_graph_data[c.CASES_MA],
         name='Cases',
         line_shape='spline',
         line={'color': graph_color}
-    ),row=1, col=1
+    )
 )
 
 
-fig_cases_hospital.add_trace(
+fig_hospital.add_trace(
     go.Scatter(
         x=hospital_graph_data[c.DATE],
         y=hospital_graph_data[c.HOSP_MA],
         name='Hospitalisations',
         line_shape='spline',
         line={'color': graph_color}
-    ), row=2, col=1
+    )
 )
 
 
-
-fig_cases_hospital.update_layout(
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font={"color": "#fff"},
-    showlegend=False
+fig_cases.update_layout(
+    title={'text': 'Daily new cases'}
 )
 
-""" fig_vaccination_pos_rate = make_subplots(
-    rows=2, cols=1,
-    subplot_titles=['Vaccination progress']) """
+fig_hospital.update_layout(
+    title={'text': 'Daily hospitalisations'}
+)
 
-fig_vaccination = go.Figure()
+fig_vaccination = go.Figure(layout=layout)
 
 fig_vaccination.add_trace(
     go.Scatter(
@@ -209,24 +225,13 @@ fig_vaccination.add_trace(
     )
 )
 
-""" fig_vaccination_pos_rate.add_trace(
-    go.Scatter(
-        x=positivity_graph_data[c.DATE],
-        y=positivity_graph_data[c.POSITIVITY_RATE]
-    ), row=1, col=2
-)
- """
 fig_vaccination.update_layout(
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font={"color": "#fff"},
-    height=300,
     title={
-        'text':'Vaccination progress',
-        'x': 0.5}
+        'text':'Vaccination progress'
+        }
 )
 
-fig_pos_rate = go.Figure()
+fig_pos_rate = go.Figure(layout=layout)
 
 fig_pos_rate.add_trace(
     go.Scatter(
@@ -237,13 +242,9 @@ fig_pos_rate.add_trace(
 )
 
 fig_pos_rate.update_layout(
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font={"color": "#fff"},
-    height=300,
     title={
-        'text':'Positivity Rate',
-        'x': 0.5},
+        'text':'Positivity Rate'
+        },
     yaxis={
         'tickformat': '%'
     }
@@ -264,14 +265,27 @@ app.layout = html.Div(
                         )
                     )
                 ,xl=6, lg=6, md=12, xs=12),
-                dbc.Col(
-                    html.Div(dcc.Graph(
-                        id="fig_cases_hospital", figure=fig_cases_hospital,
-                        config={'displaylogo': False}
+                dbc.Col(children=[
+                    dbc.Row(
+                        dbc.Col(
+                            html.Div(dcc.Graph(
+                                id="fig_cases_hospital", figure=fig_cases,
+                                config={'displaylogo': False}
+                                )
+                            )
+                        )
+                    ),
+                    dbc.Row(
+                        dbc.Col(
+                            html.Div(dcc.Graph(
+                                id="fig_hospital", figure=fig_hospital,
+                                config={'displaylogo': False}
+                                )
+                            )
                         )
                     )
-                ,xl=6, lg=6, md=12, xs=12
-                )
+                ]
+                ,xl=6, lg=6, md=12, xs=12)
             ]),
         dbc.Row([
             dbc.Col(
@@ -292,7 +306,7 @@ app.layout = html.Div(
                 )
             ,xl=6, lg=6, md=12, xs=12
             )
-        ])
+        ], align="center")
     ]
 )
 
