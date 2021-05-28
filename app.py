@@ -17,7 +17,7 @@ today = datetime.datetime(
     datetime.datetime.today().day,
 )
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY], meta_tags=[
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY, '/assets/1_spanstyles.css'], meta_tags=[
          {"name": "viewport", "content": "width=device-width, initial-scale=1"}
 ])
 server = app.server
@@ -26,7 +26,7 @@ server = app.server
 indicators = ds.get_indicators_dataset(cases, hospital, tests, vaccines, today)
 
 # template text to be used for the title of each indicator
-title_template = "<span style='font-size:0.8em;'>{}</span>"
+title_template = "<span class='indicator_title'>{}</span>"
 graph_color = '#3498db'
 figure_height = 225
 
@@ -115,7 +115,7 @@ fig_indicators.add_trace(
         delta={"reference": indicators[c.FD_PERCENTAGE_T14], "relative": True},
         number={"valueformat": "%"},
         domain={"row": 2, "column": 1},
-        title={"text": title_template.format("18+ First Dose Coverage")},
+        title={"text": title_template.format("18+ First Dose, %")},
     )
 )
 
@@ -136,7 +136,7 @@ fig_indicators.add_trace(
         delta={"reference": indicators[c.SD_PERCENTAGE_T14], "relative": True},
         number={"valueformat": "%"},
         domain={"row": 3, "column": 1},
-        title={"text": title_template.format("18+ Fully Vaccinated Coverage")},
+        title={"text": title_template.format("18+ Fully Vaccinated, %")},
     )
 )
 
@@ -263,7 +263,7 @@ container_margins={
 app.layout = html.Div(
     children=[
         html.H1("COVID-19 Belgium Dashboard", style={
-            'text-align': 'center',
+            'textAlign': 'center',
             'margin': '20px'
         }),
         dbc.Container([
@@ -317,7 +317,30 @@ app.layout = html.Div(
                     )
                 ,xl=6, lg=6, md=12, xs=12
                 )
-            ], align="center")
+            ], align="center"),
+            dbc.Row(
+                dbc.Col(
+                    html.Footer(
+                        html.Div(children=[
+                            html.Hr(style={'border-color': '#fff'}),
+                            html.H5("About COVID-19 Belgium Dashboard"),
+                            html.P(children=[
+                                'This small dashboard has been created using the data coming from Sciensano, the Belgian institute for health.',
+                                html.Br(),
+                                'All the datasets used in the dashboard can be found on '
+                                ,
+                                html.A(href='https://epistat.wiv-isp.be/covid/', children='Sciensano website'),
+                                '.',
+                                html.Br(),
+                                'Original dashboard created by Sciensano can be accessed ',
+                                html.A(href='https://datastudio.google.com/embed/u/0/reporting/c14a5cfc-cab7-4812-848c-0369173148ab/page/ZwmOB', children='here'),
+                                '.'
+                            ]),
+                        ], style={'font-size': '90%'})
+                    )    
+                ,xl=12, lg=12, md=12, xs=12)
+            )
+            
         ], fluid=True)
     ]
 )
