@@ -17,9 +17,16 @@ today = datetime.datetime(
     datetime.datetime.today().day,
 )
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY, '/assets/1_spanstyles.css'], meta_tags=[
-         {"name": "viewport", "content": "width=device-width, initial-scale=1"}
-])
+app = dash.Dash(
+    __name__,
+    external_stylesheets=[dbc.themes.DARKLY, "/assets/1_spanstyles.css"],
+    meta_tags=[
+        {
+            "name": "viewport",
+            "content": "width=device-width, initial-scale=1"
+        }
+    ],
+)
 server = app.server
 
 # get indicators needed for the first plot
@@ -27,7 +34,7 @@ indicators = ds.get_indicators_dataset(cases, hospital, tests, vaccines, today)
 
 # template text to be used for the title of each indicator
 title_template = "<span class='indicator_title'>{}</span>"
-graph_color = '#3498db'
+graph_color = "#3498db"
 figure_height = 225
 
 # initiating figure and adding traces with each indicator
@@ -75,10 +82,8 @@ fig_indicators.add_trace(
         },
         domain={"row": 1, "column": 0},
         title={
-            "text": title_template.format(
-                "Hospitalisations Daily Average"
-            )
-        },
+            "text": title_template.format("Hospitalisations Daily Average")
+            },
     )
 )
 
@@ -146,17 +151,8 @@ fig_indicators.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     font={"color": "#fff"},
-    title={
-        'text': 'Indicators of last 14 days',
-        'x': 0.5
-    }
+    title={"text": "Indicators of last 14 days", "x": 0.5},
 )
-
-
-# create subplot for cases and hospitalisations graphs
-fig_cases_hospital = make_subplots(
-    rows=2, cols=1,
-    subplot_titles=['Daily new cases', 'Daily hospitalisations'])
 
 # retrieve data for subplots / plots
 cases_graph_data = ds.get_cases_graph_data(cases)
@@ -170,13 +166,8 @@ layout = go.Layout(
     font={"color": "#fff"},
     showlegend=False,
     height=225,
-    margin={
-        't': 70,
-        'b': 40
-    },
-    title={
-        'x': 0.5
-    }
+    margin={"t": 70, "b": 40},
+    title={"x": 0.5},
 )
 
 fig_cases = go.Figure(layout=layout)
@@ -186,9 +177,9 @@ fig_cases.add_trace(
     go.Scatter(
         x=cases_graph_data[c.DATE],
         y=cases_graph_data[c.CASES_MA],
-        name='Cases',
-        line_shape='spline',
-        line={'color': graph_color}
+        name="Cases",
+        line_shape="spline",
+        line={"color": graph_color},
     )
 )
 
@@ -197,20 +188,16 @@ fig_hospital.add_trace(
     go.Scatter(
         x=hospital_graph_data[c.DATE],
         y=hospital_graph_data[c.HOSP_MA],
-        name='Hospitalisations',
-        line_shape='spline',
-        line={'color': graph_color}
+        name="Hospitalisations",
+        line_shape="spline",
+        line={"color": graph_color},
     )
 )
 
 
-fig_cases.update_layout(
-    title={'text': 'Daily new cases'}
-)
+fig_cases.update_layout(title={"text": "Daily new cases"})
 
-fig_hospital.update_layout(
-    title={'text': 'Daily hospitalisations'}
-)
+fig_hospital.update_layout(title={"text": "Daily hospitalisations"})
 
 fig_vaccination = go.Figure(layout=layout)
 
@@ -218,7 +205,7 @@ fig_vaccination.add_trace(
     go.Scatter(
         x=vaccination_graph_data[c.DATE],
         y=vaccination_graph_data[c.FD_VACCINE_T],
-        name='First dose'
+        name="First dose",
     )
 )
 
@@ -226,15 +213,11 @@ fig_vaccination.add_trace(
     go.Scatter(
         x=vaccination_graph_data[c.DATE],
         y=vaccination_graph_data[c.SD_VACCINE_T],
-        name='Fully vaccinated'
+        name="Fully vaccinated",
     )
 )
 
-fig_vaccination.update_layout(
-    title={
-        'text':'Vaccination progress'
-        }
-)
+fig_vaccination.update_layout(title={"text": "Vaccination progress"})
 
 fig_pos_rate = go.Figure(layout=layout)
 
@@ -242,106 +225,144 @@ fig_pos_rate.add_trace(
     go.Scatter(
         x=positivity_graph_data[c.DATE],
         y=positivity_graph_data[c.POS_RATE_MA],
-        name='Positivity Rate'
+        name="Positivity Rate",
     )
 )
 
 fig_pos_rate.update_layout(
-    title={
-        'text':'Positivity Rate'
-        },
-    yaxis={
-        'tickformat': '%'
-    }
+    title={"text": "Positivity Rate"},
+    yaxis={"tickformat": "%"}
 )
 
-container_margins={
-    "margin-left": "5%",
-    "margin-right": "5%"
-}
+container_margins = {"margin-left": "5%", "margin-right": "5%"}
 
 app.layout = html.Div(
     children=[
-        html.H1("COVID-19 Belgium Dashboard", style={
-            'textAlign': 'center',
-            'margin': '20px'
-        }),
-        dbc.Container([
-            dbc.Row([
-                    dbc.Col(
-                        html.Div(
-                            dcc.Graph(
-                                id="fig_indicators", figure=fig_indicators,
-                                config={'displaylogo': False}
-                            )
-                        )
-                    ,xl=6, lg=6, md=12, xs=12),
-                    dbc.Col(children=[
-                        dbc.Row(
-                            dbc.Col(
-                                html.Div(dcc.Graph(
-                                    id="fig_cases_hospital", figure=fig_cases,
-                                    config={'displaylogo': False}
-                                    )
+        html.H1(
+            "COVID-19 Belgium Dashboard",
+            style={"textAlign": "center", "margin": "20px"},
+        ),
+        dbc.Container(
+            [
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            html.Div(
+                                dcc.Graph(
+                                    id="fig_indicators",
+                                    figure=fig_indicators,
+                                    config={"displaylogo": False},
                                 )
+                            ),
+                            xl=6,
+                            lg=6,
+                            md=12,
+                            xs=12,
+                        ),
+                        dbc.Col(
+                            children=[
+                                dbc.Row(
+                                    dbc.Col(
+                                        html.Div(
+                                            dcc.Graph(
+                                                id="fig_cases",
+                                                figure=fig_cases,
+                                                config={"displaylogo": False},
+                                            )
+                                        )
+                                    )
+                                ),
+                                dbc.Row(
+                                    dbc.Col(
+                                        html.Div(
+                                            dcc.Graph(
+                                                id="fig_hospital",
+                                                figure=fig_hospital,
+                                                config={"displaylogo": False},
+                                            )
+                                        )
+                                    )
+                                ),
+                            ],
+                            xl=6,
+                            lg=6,
+                            md=12,
+                            xs=12,
+                        ),
+                    ]
+                ),
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            html.Div(
+                                dcc.Graph(
+                                    id="fig_vaccination",
+                                    figure=fig_vaccination,
+                                    config={"displaylogo": False},
+                                )
+                            ),
+                            xl=6,
+                            lg=6,
+                            md=12,
+                            xs=12,
+                        ),
+                        dbc.Col(
+                            html.Div(
+                                dcc.Graph(
+                                    id="fig_positivity_rate",
+                                    figure=fig_pos_rate,
+                                    config={"displaylogo": False},
+                                )
+                            ),
+                            xl=6,
+                            lg=6,
+                            md=12,
+                            xs=12,
+                        ),
+                    ],
+                    align="center",
+                ),
+                dbc.Row(
+                    dbc.Col(
+                        html.Footer(
+                            html.Div(
+                                children=[
+                                    html.Hr(style={"border-color": "#fff"}),
+                                    html.H5(
+                                        "About COVID-19 Belgium Dashboard"
+                                    ),
+                                    html.P(
+                                        children=[
+                                            "This small dashboard has been created using the data coming from Sciensano, the Belgian institute for health.",
+                                            html.Br(),
+                                            "All the datasets used in the dashboard can be found on ",
+                                            html.A(
+                                                href="https://epistat.wiv-isp.be/covid/",
+                                                children="Sciensano website",
+                                            ),
+                                            ".",
+                                            html.Br(),
+                                            "Original dashboard created by Sciensano can be accessed ",
+                                            html.A(
+                                                href="https://datastudio.google.com/embed/u/0/reporting/c14a5cfc-cab7-4812-848c-0369173148ab/page/ZwmOB",
+                                                children="here",
+                                            ),
+                                            ".",
+                                        ]
+                                    ),
+                                ],
+                                style={"font-size": "90%"},
                             )
                         ),
-                        dbc.Row(
-                            dbc.Col(
-                                html.Div(dcc.Graph(
-                                    id="fig_hospital", figure=fig_hospital,
-                                    config={'displaylogo': False}
-                                    )
-                                )
-                            )
-                        )
-                    ]
-                    ,xl=6, lg=6, md=12, xs=12)
-                ]),
-            dbc.Row([
-                dbc.Col(
-                    html.Div(
-                        dcc.Graph(
-                            id='fig_vaccination', figure=fig_vaccination,
-                            config={'displaylogo': False}
-                        )
+                        xl=12,
+                        lg=12,
+                        md=12,
+                        xs=12,
                     )
-                    ,xl=6, lg=6, md=12, xs=12
                 ),
-                dbc.Col(
-                    html.Div(
-                        dcc.Graph(
-                            id='fig_positivity_rate', figure=fig_pos_rate,
-                            config={'displaylogo': False}
-                        )
-                    )
-                ,xl=6, lg=6, md=12, xs=12
-                )
-            ], align="center"),
-            dbc.Row(
-                dbc.Col(
-                    html.Footer(
-                        html.Div(children=[
-                            html.Hr(style={'border-color': '#fff'}),
-                            html.H5("About COVID-19 Belgium Dashboard"),
-                            html.P(children=[
-                                'This small dashboard has been created using the data coming from Sciensano, the Belgian institute for health.',
-                                html.Br(),
-                                'All the datasets used in the dashboard can be found on '
-                                ,
-                                html.A(href='https://epistat.wiv-isp.be/covid/', children='Sciensano website'),
-                                '.',
-                                html.Br(),
-                                'Original dashboard created by Sciensano can be accessed ',
-                                html.A(href='https://datastudio.google.com/embed/u/0/reporting/c14a5cfc-cab7-4812-848c-0369173148ab/page/ZwmOB', children='here'),
-                                '.'
-                            ]),
-                        ], style={'font-size': '90%'})
-                    )    
-                ,xl=12, lg=12, md=12, xs=12)
-            )
-            
-        ], fluid=True)
+            ],
+            fluid=True,
+        ),
     ]
 )
 
