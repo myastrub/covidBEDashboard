@@ -1,0 +1,12 @@
+tspan{
+    font-size: 0.8em;
+}
+
+@media (max-width:720px) {
+    h1{
+      font-size: 1.4em;
+    }
+    tspan {
+      font-size: 0.6em;
+    }
+  }
