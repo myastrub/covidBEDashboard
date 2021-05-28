@@ -217,7 +217,9 @@ fig_vaccination.add_trace(
     )
 )
 
-fig_vaccination.update_layout(title={"text": "Vaccination progress"})
+fig_vaccination.update_layout(
+    title={"text": "Vaccination progress"},
+    showlegend=True)
 
 fig_pos_rate = go.Figure(layout=layout)
 
